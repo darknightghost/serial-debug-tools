@@ -42,13 +42,14 @@ class SendFormater(Formater.SendFormater):
             try:
                 for t in text:
                     data.append(int(t, base = 0x10))
+                data = bytes(data)
                 break
 
             except ValueError:
                 print("Illefal input!")
                 continue
 
-        return bytes(data)
+        return data
 
     def close(self):
         '''
