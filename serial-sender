@@ -1,0 +1,74 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+'''
+      Copyright 2017, 王思远 <darknightghost.cn@gmail.com>
+      This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+      You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
+import os
+import sys
+import Formater
+
+def main(argv):
+    #Aanalyse arguments
+    if "-h" in argv or "--help" in argv or "-?" in argv:
+        usage(argv[0])
+        return 0
+
+    elif len(argv) < 3:
+        usage(argv[0])
+        return -1
+
+    device_path = argv[-1]
+    formater_name = argv[1]
+    args = argv[1 : -1]
+
+    #Open device
+    try:
+        f = os.open(device_path,os.O_WRONLY)
+
+    except Exception as e:
+        print(str(e))
+        return -1
+
+    #Open formater
+    try:
+        formater = Formater.open_send_formater(formater_name, args)
+
+    except FileNotFoundError:
+        print("Fomater does not exists.")
+        os.close(f)
+        return -1
+
+    do_send(f, formater);
+    print("")
+    return 0
+
+def usage(name):
+    print("Usage:\n"
+            "\t%s formater [formater-arguments] device")
+    return
+
+def do_send(dev_fd, formater):
+    try:
+        while True:
+            data = formater.get_data()
+            if len(data) > 0:
+                os.write(dev_fd, data)
+                print("%d byte(s) sent."%len(data))
+
+    except KeyboardInterrupt:
+        pass
+
+ret = main(sys.argv)
+exit(ret)
